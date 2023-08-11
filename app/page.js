@@ -1,6 +1,7 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { Line } from "react-chartjs-2";
+;
 import {
   Chart as ChartJS,
   CategoryScale,
@@ -19,7 +20,7 @@ ChartJS.register(
   LineElement,
   Title,
   Tooltip,
-  Legend
+  Legend,
 );
 
 
@@ -27,88 +28,111 @@ export default function Home() {
   const [csvData, setCsvData] = useState([]);
 
 
-    // ------------- get the file data -------------
-    async function getData() {
-      try {
-        const response = await fetch("/telemetry_data.csv");
-        const data = await response.text();
-  
-        const table = data.split("\n").slice(1);
-  
-  
-        const dataSplit = table.map((row) => {
-          const cols = row.split("\r");
-          return cols
-        });
-  
-        setCsvData(dataSplit);
-  
-      } catch (error) {
-        console.error("Error fetching CSV data:", error);
+  // ------------- get the file data -------------
+
+  async function getDataTable() {
+    try {
+      const response = await fetch("/telemetry_data.csv");
+      const dataCSV = await response.text();
+      //each row in [] splited
+      const array = dataCSV.split("\n").map((item) => item.split(","));//.slice(1); 
+      //put each column in an array
+      const newDataArray = [];
+      for (let i = 0; i < array[0].length; i++) {
+        let subArray = [];
+        for (let row of array) {
+
+          subArray.push(row[i]);
+        }
+        newDataArray.push(subArray);
       }
-      // console.log(table[1].split("\t")[0]);
+      setCsvData(newDataArray)
+    } catch (error) {
+      console.error("Error fetching CSV data:", error);
     }
-//console.log(csvData)
+
+  }
+  useEffect(() => {
+    getDataTable();
+
+  }, []);
 
 
-const options = {
-  responsive: true,
-  plugins: {
-    legend: {
-      position: 'top' ,
+  const options = {
+    responsive: true,
+    plugins: {
+      colors: {
+        enabled: true,
+        forceOverride: true
+      },
+      legend: {
+        position: 'top',
+      },
+      title: {
+        display: true,
+        text: 'Line Chart',
+      },
     },
-    title: {
-      display: true,
-      text: 'Chart.js Line Chart',
-    },
-  },
-};
-
-const labels = ['January', 'February', 'March', 'April', 'May', 'June', 'July'];
-const xLine = [65, 59, 80, 81, 56, 55, 40];
-
- const data = {
-  labels,
-  datasets: [
- 
-    {
-      label: 'Dataset 1',
-      data: [1],
-      borderColor: 'rgb(255, 99, 132)',
-      backgroundColor: 'rgba(255, 99, 132, 0.5)',
+    scales: {
+      x: {
+        ticks: {
+          maxRotation: 90,
+          minRotation: 90,
+          padding: 1,
+          autoSkip: false,
+          fontSize: 10,
+        },
+      }
     }
-  ],
-};
+  };
 
 
+  const yLineDate = [];//title x
+  let eachEntry = [];
+
+  for (let i = 1; i < csvData.length; i++) {
+    let r = Math.floor(Math.random() * 255);
+    let g = Math.floor(Math.random() * 255);
+    let b = Math.floor(Math.random() * 255);
+    let table = csvData;
+    let colTitle = table[i].shift();
+    let obj = {
+      label: colTitle,
+      data: table[i],
+      borderColor: "rgb(" + r + ", " + g + ", " + b + ")",
+      backgroundColor: "rgb(" + r + ", " + g + ", " + b + ")",
+    }
+    yLineDate.push(csvData[0][i]);
+    eachEntry.push(obj)
+  }
+
+  //table  data
+  const data = {
+    labels: yLineDate,
+    datasets:
+      eachEntry
+    ,
+  };
 
 
-
-
-
-
-useEffect(() => {
-  getData();
-
-}, []);
 
 
 
 
   return (
     <body>
-    <header className="pt-3">
-      <div className="font-bold text-xl px-5">Line Chart</div>
-    </header>
+      <header className="pt-3">
+        <div className="font-bold text-xl px-5">Line Chart</div>
+      </header>
 
-    <main className="max-w-full  mx-10 mt-16 ">
-  
-      <div className="w-full h-full ">
-      <canvas id="chart"  className="max-w-full"></canvas>
-      <Line options={options} data={data} />
-      </div>
-     
-    </main>
-  </body>
+      <main className="max-w-full  mx-10 mt-16 ">
+
+        <div className="">
+          <canvas id="chart" className="w-1 h-full cursor-pointer"></canvas>
+          <Line options={options} data={data} />
+        </div>
+
+      </main>
+    </body>
   )
 }
