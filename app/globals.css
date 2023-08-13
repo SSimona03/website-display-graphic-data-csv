@@ -2,9 +2,11 @@
 @tailwind components;
 @tailwind utilities;
 
-
 * {
   box-sizing: border-box;
   font-family: "Roboto", sans-serif;
 }
 
+#highcharts-0cvpwk4-0 {
+  height: 600px;
+}
