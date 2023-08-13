@@ -5,14 +5,6 @@ import Highcharts from 'highcharts/highstock'
 import HighchartsExporting from 'highcharts/modules/exporting'
 import HighchartsReact from 'highcharts-react-official'
 
-
-// Load Highcharts modules
-require('highcharts/indicators/indicators')(Highcharts)
-require('highcharts/indicators/pivot-points')(Highcharts)
-require('highcharts/indicators/macd')(Highcharts)
-require('highcharts/modules/exporting')(Highcharts)
-require('highcharts/modules/map')(Highcharts)
-
 if (typeof Highcharts === 'object') {
   HighchartsExporting(Highcharts)
 }
@@ -60,7 +52,7 @@ function Home() {
   }, []);
 
 
-  console.log(yLineDate)
+  // console.log(yLineDate)
 
   useEffect(() => {
     if (csvData.length) {
@@ -185,7 +177,7 @@ function Home() {
 
     }
     setOptions(options)
-  }, [entryData, regionSelected, number])
+  }, [entryData, regionSelected, number, yLineDate])
 
 
 
@@ -238,7 +230,7 @@ function Home() {
             .filter(region => region.includes(searchTable))
             .map((region, index) => (
 
-              <div className={`py-2 px-4 ${index === indexSearch ? 'bg-gray-300' : ''}`}
+              <div key={index} className={`py-2 px-4 ${index === indexSearch ? 'bg-gray-300' : ''}`}
                 onClick={() => handleRegionClick(index, region)}
               >
                 {region}
